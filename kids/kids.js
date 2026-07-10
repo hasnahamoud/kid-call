@@ -50,8 +50,74 @@ export async function getAllKids(req, res, next) {
     }
 
     res.send(data);
-}
+ }
+// export async function callKid(req, res, next) {
+//     const client = await createSupabaseClient();
 
+//     const kid_id = req.params.id;
+//     const user_id = req.user.id;
+
+//     const { data, error } = await client
+//         .from("kids")
+//         .select("*")
+//         .eq("id", kid_id);
+
+//     if (error) {
+//         throw new AppError("Could not get kid", 500, error);
+//     }
+
+//     if (data.length === 0) {
+//         throw new AppError("Kid not found", 404);
+//     }
+
+//     const { error: callError } = await client
+//         .from("calls")
+//         .insert({
+//             user_id,
+//             kid_id
+//         });
+
+//     if (callError) {
+//         throw new AppError("Could not create call", 500, callError);
+//     }
+
+//     const { error: logError } = await client
+//         .from("call_logs")
+//         .insert({
+//             user_id,
+//             kid_id
+//         });
+
+//     if (logError) {
+//         throw new AppError("Could not create call log", 500, logError);
+//     }
+
+//     return res.status(200).json({
+//         message: "Call initiated successfully"
+//     });
+// } 
 export async function callKid(req, res, next) {
-    
+    const client = await createSupabaseClient();
+
+    const kid_id = req.params.id;
+    const user_id = req.user.id;
+
+    const { data, error } = await client
+        .from("kids")
+        .select("*")
+        .eq("id", kid_id);
+
+    if (error) {
+        throw new AppError("Could not get kid", 500, error);
+    }
+
+    if (data.length === 0) {
+        throw new AppError("Kid not found", 404);
+    }
+
+    return res.status(200).json({
+        message: "Call initiated successfully",
+        user_id,
+        kid_id
+    });
 }
