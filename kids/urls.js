@@ -1,10 +1,27 @@
+// import { addKid, getKidsOf, callKid } from './kids.js';
+// import {
+//     validateAddingKid,
+//     validateGetKidsOf,
+//     validateCallKid
+// } from './validators.js';
+
+// export const router = express.Router();
+
+// router.post('/', validateAddingKid, addKid);
+
+// router.get('/:id', validateGetKidsOf, getKidsOf);
+// router.post('/:id/call', validateCallKid, callKid);
+
+
+
 import express from 'express';
-import { addKid, getKidsOf } from './kids.js';
-import { validateAddingKid, validateGetKidsOf } from './validators.js';
+import { addKid, getKidsOf, callKid } from './kids.js';
+import { validateAddingKid, validateGetKidsOf, validateCallKid } from './validators.js';
 
 export const router = express.Router();
 
 router.post('/', validateAddingKid, addKid);
 
-router.get('/:id', validateGetKidsOf, getKidsOf);
+router.post('/:id/call', validateCallKid, callKid);
 
+router.get('/:id', validateGetKidsOf, getKidsOf);
