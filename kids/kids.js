@@ -115,6 +115,17 @@ export async function callKid(req, res, next) {
         throw new AppError("Kid not found", 404);
     }
 
+    const { error: callError } = await client
+        .from("calls")
+        .insert({
+            user_id,
+            kid_id
+        });
+
+    if (callError) {
+        throw new AppError("Could not create call", 500, callError);
+    }
+
     return res.status(200).json({
         message: "Call initiated successfully",
         user_id,
