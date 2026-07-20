@@ -126,6 +126,17 @@ export async function callKid(req, res, next) {
         throw new AppError("Could not create call", 500, callError);
     }
 
+    const { error: logError } = await client
+        .from("call_logs")
+        .insert({
+            user_id,
+            kid_id
+        });
+
+    if (logError) {
+        throw new AppError("Could not create call log", 500, logError);
+    }
+
     return res.status(200).json({
         message: "Call initiated successfully",
         user_id,
