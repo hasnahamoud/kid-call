@@ -5,18 +5,18 @@ export async function addKid(req, res, next) {
     const full_name = req.body.full_name;
     const user_id = req.body.user_id ?? req.user.id;
     const classroom = req.body.classroom;
-    const is_confirmed = req.user.role === 'admin';
+    const is_confirmed = req.user.role === "admin";
 
     const client = await createSupabaseClient();
 
-    const {error} = await client.from('kids').insert({
+    const { error } = await client.from("kids").insert({
         full_name,
         user_id,
         classroom,
         is_confirmed
     });
 
-    if(error){
+    if (error) {
         throw new AppError("Could not add kid", 500, error);
     }
 
@@ -27,75 +27,39 @@ export async function getKidsOf(req, res, next) {
     const client = await createSupabaseClient();
     const user_id = req.params.id;
 
-    const { data, error } = await client.from("kids").select("*").eq("user_id", user_id);
+    const { data, error } = await client
+        .from("kids")
+        .select("*")
+        .eq("user_id", user_id);
 
-    if(error){
+    if (error) {
         throw new AppError("Could not getting kids", 500, error);
     }
 
-    res.send(data);
+    return res.send(data);
 }
 
 export async function getAllKids(req, res, next) {
-    if(req.user.role !== 'admin') {
-        throw new AppError("You are not allowed to access this resource", 403, error);
+    if (req.user.role !== "admin") {
+        throw new AppError(
+            "You are not allowed to access this resource",
+            403
+        );
     }
 
     const client = await createSupabaseClient();
 
-    const { data, error } = await client.from("kids").select("*");
+    const { data, error } = await client
+        .from("kids")
+        .select("*");
 
-    if(error){
+    if (error) {
         throw new AppError("Could not getting all kids", 500, error);
     }
 
-    res.send(data);
- }
-// export async function callKid(req, res, next) {
-//     const client = await createSupabaseClient();
+    return res.send(data);
+}
 
-//     const kid_id = req.params.id;
-//     const user_id = req.user.id;
-
-//     const { data, error } = await client
-//         .from("kids")
-//         .select("*")
-//         .eq("id", kid_id);
-
-//     if (error) {
-//         throw new AppError("Could not get kid", 500, error);
-//     }
-
-//     if (data.length === 0) {
-//         throw new AppError("Kid not found", 404);
-//     }
-
-//     const { error: callError } = await client
-//         .from("calls")
-//         .insert({
-//             user_id,
-//             kid_id
-//         });
-
-//     if (callError) {
-//         throw new AppError("Could not create call", 500, callError);
-//     }
-
-//     const { error: logError } = await client
-//         .from("call_logs")
-//         .insert({
-//             user_id,
-//             kid_id
-//         });
-
-//     if (logError) {
-//         throw new AppError("Could not create call log", 500, logError);
-//     }
-
-//     return res.status(200).json({
-//         message: "Call initiated successfully"
-//     });
-// } 
 export async function callKid(req, res, next) {
     const client = await createSupabaseClient();
 
@@ -141,5 +105,39 @@ export async function callKid(req, res, next) {
         message: "Call initiated successfully",
         user_id,
         kid_id
+    });
+}
+
+export async function confirmKid(req, res, next) {
+    if (req.user.role !== "admin") {
+        throw new AppError(
+            "You are not allowed to access this resource",
+            403
+        );
+    }
+
+    const kid_id = req.params.id;
+    const client = await createSupabaseClient();
+
+    const { data, error } = await client
+        .from("kids")
+        .update({
+            is_confirmed: true
+        })
+        .eq("id", kid_id)
+        .select("*")
+        .maybeSingle();
+
+    if (error) {
+        throw new AppError("Could not confirm kid", 500, error);
+    }
+
+    if (!data) {
+        throw new AppError("Kid not found", 404);
+    }
+
+    return res.status(200).json({
+        message: "Kid confirmed successfully",
+        kid: data
     });
 }
